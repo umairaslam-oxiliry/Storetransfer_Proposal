@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Transfer Automation Proposal & Prototype</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Chosen Palette: Warm Neutrals & Professional Blues (Slate 50, Blue 600, Emerald 500, Slate 800) -->
+    <!-- Application Structure Plan: The SPA is structured as an interactive presentation of the proposal, transitioning into a functional prototype of the proposed dashboard. 1. Executive Summary & Impact (Chart) immediately shows the value proposition (time savings). 2. Problem/Solution matrix highlights feature benefits. 3. Interactive Prototype allows the user to 'test drive' the proposed workflow, demonstrating ease of use and logical flow. 4. Roadmap outlines next steps. This structure is chosen to persuade stakeholders by first showing the 'why' (data/charts) and then the 'how' (interactive prototype). -->
+    <!-- Visualization & Content Choices: 1. Efficiency Gains -> Stacked Bar Chart (Chart.js) -> Compare manual vs automated times visually -> Bar charts perfectly contrast magnitudes of time. 2. Features -> Interactive Cards -> Hover/Click to reveal details -> Keeps UI clean while providing deep dives. 3. Process Flow -> Functional Form Simulator -> User inputs data & clicks 'Run' to see mock results -> Demonstrates the actual proposed solution's user experience. Confirming NO SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 50vh;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .hide-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .step-active {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <nav class="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-3">
+                    <span class="text-2xl font-bold">&#9881;</span>
+                    <span class="font-semibold text-lg tracking-wide">Migration Command Center</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <button onclick="scrollToSection('impact')" class="hover:text-blue-200 transition-colors">Impact Analysis</button>
+                    <button onclick="scrollToSection('features')" class="hover:text-blue-200 transition-colors">Core Features</button>
+                    <button onclick="scrollToSection('prototype')" class="hover:text-blue-200 transition-colors font-semibold text-emerald-400">Dashboard Prototype</button>
+                    <button onclick="scrollToSection('roadmap')" class="hover:text-blue-200 transition-colors">Roadmap</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-20">
+
+        <header class="text-center space-y-4 max-w-4xl mx-auto">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">Automated Store Transfer & Verification System</h1>
+            <p class="text-xl text-slate-600 leading-relaxed">Transforming the complex 12-month historical data migration QA process from an 8-hour manual bottleneck into a 30-minute automated operation across .48, .235, and Purge environments.</p>
+            <div class="flex justify-center gap-4 pt-4">
+                <span class="px-4 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">Client 46 &#8594; 93</span>
+                <span class="px-4 py-1 bg-slate-200 text-slate-800 rounded-full text-sm font-semibold">Status: Proposed</span>
+            </div>
+        </header>
+
+        <section id="impact" class="scroll-mt-24">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                <div class="mb-8 max-w-3xl">
+                    <h2 class="text-3xl font-bold text-slate-800 mb-4">The Business Impact: 94% Efficiency Gain</h2>
+                    <p class="text-slate-600">This section visualizes the core value proposition of the proposal. The chart below breaks down the time spent on specific QA tasks during a store transfer. By shifting from manual SQL queries to an orchestrated web application, we drastically reduce processing time and human error.</p>
+                </div>
+                
+                <div class="flex flex-col lg:flex-row gap-8 items-center">
+                    <div class="w-full lg:w-2/3">
+                        <div class="chart-container">
+                            <canvas id="efficiencyChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full lg:w-1/3 space-y-4">
+                        <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                            <div class="text-4xl font-black text-slate-800 mb-2">8 Hours</div>
+                            <div class="text-sm text-slate-500 font-semibold uppercase tracking-wider">Current Manual Process</div>
+                        </div>
+                        <div class="bg-emerald-50 p-6 rounded-xl border border-emerald-100 shadow-sm">
+                            <div class="text-4xl font-black text-emerald-600 mb-2">30 Mins</div>
+                            <div class="text-sm text-emerald-800 font-semibold uppercase tracking-wider">Proposed Automation</div>
+                        </div>
+                        <div class="p-4 bg-blue-50 text-blue-800 rounded-lg text-sm">
+                            <span class="font-bold text-lg block mb-1">&#8595; 450 Minutes Saved</span>
+                            Per migration batch, freeing QA analysts for higher-level data integrity investigations.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="scroll-mt-24">
+            <div class="mb-8 max-w-3xl mx-auto text-center">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">Resolving Complex Multi-Environment Synchronization</h2>
+                <p class="text-slate-600">This section outlines the specific engines powering the proposed dashboard. The manual process struggles with mapping entities across environments. The solution introduces four specialized engines to automate these specific pain points, ensuring data parity across .48, .235, and CMS.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+                    <div class="text-3xl mb-4">&#128202;</div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Unified Count Engine</h3>
+                    <p class="text-sm text-slate-600">One-click execution of <code class="bg-slate-100 px-1 rounded text-pink-600">COUNT(*)</code> queries across .48, .235, and Purge. Validates Store Monitoring, Employees, Customers, and Unknowns (In/Out) instantly.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+                    <div class="text-3xl mb-4">&#128269;</div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">ID Transformation Auditor</h3>
+                    <p class="text-sm text-slate-600">Automatically scans post-migration tables to ensure no <code class="bg-slate-100 px-1 rounded">Unknowns</code> or <code class="bg-slate-100 px-1 rounded">SalesDetail</code> records are left stranded with the old StoreID.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+                    <div class="text-3xl mb-4">&#128101;</div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Sales & Hierarchy Sync</h3>
+                    <p class="text-sm text-slate-600">Verifies <code class="bg-slate-100 px-1 rounded">CompanyID</code> updates, Employee Roles, Hierarchy positioning, Store termination dates, and Timing Exceptions across the 12-month window.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+                    <div class="text-3xl mb-4">&#128200;</div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">3-Month MOM Tracker</h3>
+                    <p class="text-sm text-slate-600">Automated comparison of <code class="bg-slate-100 px-1 rounded">Sales_Flatten</code> conversion metrics from 3 months prior to ensure data trend continuity remains unbroken.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="prototype" class="scroll-mt-24 bg-slate-900 rounded-3xl p-8 shadow-xl text-slate-200 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 font-mono text-xs text-right hidden lg:block">
+                SELECT count(*) FROM storemonitoring_purge WHERE storeid = 10579<br>
+                UPDATE unknowns SET storeid = 10580 WHERE old_storeid = 6623<br>
+                SELECT * FROM CustomerGroupTimeDetail_New
+            </div>
+            
+            <div class="relative z-10">
+                <div class="mb-8 max-w-3xl">
+                    <h2 class="text-3xl font-bold text-white mb-4">Interactive Dashboard Prototype</h2>
+                    <p class="text-slate-400">Experience the proposed workflow. This simulator represents the primary interface the QA team will use. Enter the migration parameters, define the store mapping, and run the automated verification sequence to see how the system aggregates cross-environment data into a single compliance view.</p>
+                </div>
+
+                <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        
+                        <div class="lg:col-span-1 space-y-6">
+                            <h3 class="text-xl font-semibold text-white border-b border-slate-700 pb-2">1. Migration Parameters</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Ticket Number</label>
+                                    <input type="text" value="#1268237" class="w-full bg-slate-900 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:border-blue-500" readonly>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Old Client ID</label>
+                                        <input type="text" value="46" class="w-full bg-slate-900 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:border-blue-500" readonly>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">New Client ID</label>
+                                        <input type="text" value="93" class="w-full bg-slate-900 border border-slate-600 rounded-md py-2 px-3 text-emerald-400 focus:outline-none focus:border-blue-500" readonly>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Cutoff Date</label>
+                                        <input type="text" value="02/28/2026" class="w-full bg-slate-900 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:border-blue-500" readonly>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Transfer Date</label>
+                                        <input type="text" value="03/01/2026" class="w-full bg-slate-900 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:border-blue-500" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold text-white border-b border-slate-700 pb-2 pt-4">2. Store Mapping</h3>
+                            <div class="bg-slate-900 rounded-md border border-slate-700 overflow-hidden text-sm">
+                                <table class="w-full text-left">
+                                    <thead class="bg-slate-800 text-slate-400">
+                                        <tr>
+                                            <th class="py-2 px-3 font-medium">Old ID</th>
+                                            <th class="py-2 px-3 font-medium">New ID</th>
+                                            <th class="py-2 px-3 font-medium">Location</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-800 text-slate-300">
+                                        <tr><td class="py-2 px-3">6614</td><td class="py-2 px-3 text-emerald-400">10579</td><td class="py-2 px-3">Celina OH</td></tr>
+                                        <tr><td class="py-2 px-3">6623</td><td class="py-2 px-3 text-emerald-400">10580</td><td class="py-2 px-3">Minster OH</td></tr>
+                                        <tr><td class="py-2 px-3">6617</td><td class="py-2 px-3 text-emerald-400">10581</td><td class="py-2 px-3">Saint Marys OH</td></tr>
+                                        <tr><td class="py-2 px-3">6615</td><td class="py-2 px-3 text-emerald-400">10582</td><td class="py-2 px-3">Van Wert OH</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <button id="runVerificationBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-md transition-colors shadow-lg mt-4 flex justify-center items-center gap-2">
+                                <span>&#9654;</span> Execute Automated Verification
+                            </button>
+                        </div>
+
+                        <div class="lg:col-span-2">
+                            <div class="h-full bg-slate-900 rounded-xl border border-slate-700 p-6 flex flex-col">
+                                <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-4">
+                                    <h3 class="text-xl font-semibold text-white">Verification Console</h3>
+                                    <span id="consoleStatus" class="px-3 py-1 bg-slate-800 text-slate-400 rounded-full text-xs font-mono">Status: Idle</span>
+                                </div>
+                                
+                                <div id="idleState" class="flex-1 flex flex-col items-center justify-center text-slate-500">
+                                    <div class="text-4xl mb-4">&#128187;</div>
+                                    <p>Awaiting execution command...</p>
+                                    <p class="text-sm mt-2 text-center max-w-sm">Will run 14 distinct cross-environment checks spanning 12 months of historical data.</p>
+                                </div>
+
+                                <div id="loadingState" class="flex-1 flex flex-col items-center justify-center hidden">
+                                    <div class="loader mb-4"></div>
+                                    <p class="text-blue-400 font-mono text-sm" id="loadingText">Connecting to .48 Production...</p>
+                                </div>
+
+                                <div id="resultsState" class="flex-1 hidden flex-col">
+                                    <div class="grid grid-cols-4 gap-2 mb-4">
+                                        <div class="bg-slate-800 p-3 rounded text-center border-t-2 border-emerald-500">
+                                            <div class="text-2xl font-bold text-emerald-400">100%</div>
+                                            <div class="text-xs text-slate-400 uppercase tracking-wide">Data Parity</div>
+                                        </div>
+                                        <div class="bg-slate-800 p-3 rounded text-center border-t-2 border-emerald-500">
+                                            <div class="text-2xl font-bold text-white">4</div>
+                                            <div class="text-xs text-slate-400 uppercase tracking-wide">Stores Mapped</div>
+                                        </div>
+                                        <div class="bg-slate-800 p-3 rounded text-center border-t-2 border-emerald-500">
+                                            <div class="text-2xl font-bold text-white">42k+</div>
+                                            <div class="text-xs text-slate-400 uppercase tracking-wide">Rows Scanned</div>
+                                        </div>
+                                        <div class="bg-slate-800 p-3 rounded text-center border-t-2 border-blue-500">
+                                            <div class="text-2xl font-bold text-blue-400">12s</div>
+                                            <div class="text-xs text-slate-400 uppercase tracking-wide">Exec Time</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex-1 overflow-y-auto hide-scroll text-sm">
+                                        <table class="w-full text-left">
+                                            <thead class="sticky top-0 bg-slate-900 border-b border-slate-700 text-slate-400">
+                                                <tr>
+                                                    <th class="py-2 px-2">Verification Module</th>
+                                                    <th class="py-2 px-2">Environment Target</th>
+                                                    <th class="py-2 px-2">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-slate-800" id="resultsTableBody">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <div class="mt-4 pt-4 border-t border-slate-700 flex justify-end">
+                                        <button class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded text-sm transition-colors">
+                                            &#128196; Export Verification PDF
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="roadmap" class="scroll-mt-24 pb-20">
+            <div class="mb-8 max-w-3xl">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">Implementation Roadmap</h2>
+                <p class="text-slate-600">The transition from manual checks to full automation is scheduled over a 4-week period. This phased approach ensures secure integration with database environments and rigorous user acceptance testing before production deployment.</p>
+            </div>
+
+            <div class="space-y-4 max-w-4xl">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-24 text-sm font-bold text-blue-600 pt-1">Week 1</div>
+                    <div class="w-4 h-4 rounded-full bg-blue-600 mt-1.5 mr-4 ring-4 ring-blue-100 flex-shrink-0"></div>
+                    <div class="flex-1 bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                        <h4 class="text-lg font-bold text-slate-800">Database API Development</h4>
+                        <p class="text-slate-600 text-sm mt-1">Develop Read-Only API connectors / Stored Procedures for cross-server data fetching. Secure service account provisioning for .48, .235, and Purge databases.</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-24 text-sm font-bold text-slate-500 pt-1">Week 2</div>
+                    <div class="w-4 h-4 rounded-full bg-slate-300 mt-1.5 mr-4 ring-4 ring-slate-100 flex-shrink-0"></div>
+                    <div class="flex-1 bg-white p-5 rounded-lg border border-slate-200 shadow-sm opacity-80">
+                        <h4 class="text-lg font-bold text-slate-800">Frontend Dashboard Construction</h4>
+                        <p class="text-slate-600 text-sm mt-1">Develop the React/Web UI shown in the prototype above. Build the input grids for Store Mapping and the dynamic Status Console.</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-24 text-sm font-bold text-slate-500 pt-1">Week 3</div>
+                    <div class="w-4 h-4 rounded-full bg-slate-300 mt-1.5 mr-4 ring-4 ring-slate-100 flex-shrink-0"></div>
+                    <div class="flex-1 bg-white p-5 rounded-lg border border-slate-200 shadow-sm opacity-80">
+                        <h4 class="text-lg font-bold text-slate-800">Validation Logic Integration</h4>
+                        <p class="text-slate-600 text-sm mt-1">Wire the UI to the backend algorithms. Implement logic for 12-month historical data validation, Flatten table synchronization, and 3-month MOM conversion tracking.</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-24 text-sm font-bold text-slate-500 pt-1">Week 4</div>
+                    <div class="w-4 h-4 rounded-full bg-slate-300 mt-1.5 mr-4 ring-4 ring-slate-100 flex-shrink-0"></div>
+                    <div class="flex-1 bg-white p-5 rounded-lg border border-slate-200 shadow-sm opacity-80">
+                        <h4 class="text-lg font-bold text-slate-800">UAT & Reporting Automation</h4>
+                        <p class="text-slate-600 text-sm mt-1">Finalize automated PDF/Excel report exports. Conduct User Acceptance Testing using Ticket #1268237 as the pilot migration case.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('efficiencyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        'Env Count Comparison', 
+                        'Employee/Unknown Mapping', 
+                        'Sales & Conversion Validation', 
+                        'Hierarchy & Role Verification'
+                    ],
+                    datasets: [
+                        {
+                            label: 'Manual Process (Minutes)',
+                            data: [120, 150, 120, 90],
+                            backgroundColor: 'rgba(148, 163, 184, 0.8)',
+                            borderColor: 'rgb(100, 116, 139)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Proposed Automation (Minutes)',
+                            data: [2, 5, 10, 13],
+                            backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                            borderColor: 'rgb(5, 150, 105)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y + ' mins';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Time Spent (Minutes)' }
+                        },
+                        x: {
+                            ticks: {
+                                callback: function(value) {
+                                    const label = this.getLabelForValue(value);
+                                    if (label.length > 16) {
+                                        return label.substr(0, 16) + '...';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const runBtn = document.getElementById('runVerificationBtn');
+            const idleState = document.getElementById('idleState');
+            const loadingState = document.getElementById('loadingState');
+            const resultsState = document.getElementById('resultsState');
+            const consoleStatus = document.getElementById('consoleStatus');
+            const loadingText = document.getElementById('loadingText');
+            const tableBody = document.getElementById('resultsTableBody');
+
+            const verificationSteps = [
+                { module: "storemonitoring, purge counts", env: ".48 vs .235", status: "Match Verified" },
+                { module: "employee customer count", env: ".48 vs .235", status: "Match Verified" },
+                { module: "unknowns storeid update", env: "DB/Purge", status: "Mapped to New IDs" },
+                { module: "CustomerGroupTimeDetail_New", env: "Flatten Logic", status: "12m Validated" },
+                { module: "Sales_Flatten vs SalesDetail", env: "CMS Check", status: "Company ID Synced" },
+                { module: "Storeopen/closedate flatten", env: ".48", status: "Flattened Correctly" },
+                { module: "Hierarchy & Employee Role", env: "CMS", status: "Hierarchy Synced" },
+                { module: "3 Months MOM Conversion", env: "Reporting", status: "Continuity Maintained" }
+            ];
+
+            runBtn.addEventListener('click', function() {
+                runBtn.disabled = true;
+                runBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                
+                idleState.classList.add('hidden');
+                resultsState.classList.add('hidden');
+                loadingState.classList.remove('hidden');
+                consoleStatus.innerText = "Status: Executing...";
+                consoleStatus.classList.replace('text-slate-400', 'text-blue-400');
+                
+                tableBody.innerHTML = ''; 
+
+                let stepCount = 0;
+                const messages = [
+                    "Connecting to .48 Production...",
+                    "Querying .235 Reporting...",
+                    "Comparing Purge Data...",
+                    "Validating ID Transformations...",
+                    "Flattening Sales History..."
+                ];
+
+                const textInterval = setInterval(() => {
+                    stepCount++;
+                    if(stepCount < messages.length) {
+                        loadingText.innerText = messages[stepCount];
+                    }
+                }, 600);
+
+                setTimeout(() => {
+                    clearInterval(textInterval);
+                    loadingState.classList.add('hidden');
+                    resultsState.classList.remove('hidden');
+                    consoleStatus.innerText = "Status: Verification Passed";
+                    consoleStatus.classList.replace('text-blue-400', 'text-emerald-400');
+                    consoleStatus.classList.add('bg-emerald-900', 'border', 'border-emerald-700');
+
+                    verificationSteps.forEach((step, index) => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-slate-800 transition-colors opacity-0";
+                        tr.style.animation = `fadeIn 0.3s ease forwards ${index * 0.1}s`;
+                        tr.innerHTML = `
+                            <td class="py-3 px-2 text-white">&#10003; ${step.module}</td>
+                            <td class="py-3 px-2 text-slate-400">${step.env}</td>
+                            <td class="py-3 px-2 text-emerald-400 font-medium">${step.status}</td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+
+                    runBtn.disabled = false;
+                    runBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    runBtn.innerHTML = "<span>&#8634;</span> Run Again";
+                }, 3000);
+            });
+        });
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</body>
+</html>
